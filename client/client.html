@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<title>Gem Thief</title>
+	<meta charset="utf-8">
+	
+	<style>
+		canvas {border: 1px solid black;}
+	</style>
+	
+	<!-- socket.io loaded to io var -->
+	<script src="/socket.io/socket.io.js"></script>
+	
+	<!-- Link up for server communication -->
+	<script>
+		"use strict";
+		
+		// web socket to use
+		var socket;
+		// game canvas and context
+		var canvas;
+		var ctx;
+		
+		// setup page and get socket
+		function init() {
+			// grab and setup socket
+			socket = io.connect();
+			
+			// get reference to game canvas and context
+			canvas = document.querySelector("#gameCanvas");
+			ctx = canvas.getContext('2d');
+		}
+		
+		window.onload = init;
+	</script>
+</head>
+
+<body>
+	<h1>Gem Thief</h1>
+	<canvas id="gameCanvas" width="640" height="480">Your browser does not support Canvas. Upgrade to a newer browser to play.</canvas>
+</body>
+</html>

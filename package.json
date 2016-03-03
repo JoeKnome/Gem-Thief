@@ -2,10 +2,22 @@
   "name": "gem-thief",
   "version": "1.0.0",
   "description": "A competitive game based on speed and dexterity.",
-  "main": "index.js",
+  "main": "./src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+	"start": "node ./src/server.js",
+    "pretest": "jshint ./src",
+    "test": "echo \"Test Complete\""
   },
   "author": "Joe Kapusta",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JoeKnome/Gem-Thief.git"
+  },
+  "dependencies": {
+    "socket.io": "^1.4.5"
+  },
+  "devDependencies": {
+	"jshint": "^2.9.1"
+  }
 }
