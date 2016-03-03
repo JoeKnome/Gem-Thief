@@ -1,0 +1,11 @@
+{
+  "name": "gem-thief",
+  "version": "1.0.0",
+  "description": "A competitive game based on speed and dexterity.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Joe Kapusta",
+  "license": "ISC"
+}
