@@ -50,7 +50,7 @@ function createRoom() {
 	queue[1].join(name);
 	
 	// notify users of new game
-	io.sockets.in(name).emit("msg", {msg: "Opponent connected. Starting the game."});
+	io.sockets.in(name).emit("msg", {msg: "Opponent connected. Starting the game. Drag the gems into yor base to score."});
 	
 	// create the new game
 	var newGame = new GameManager(io, name, queue[0], queue[1]);
