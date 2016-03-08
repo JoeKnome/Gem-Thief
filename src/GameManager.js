@@ -9,7 +9,9 @@ class GameManager {
 		this.io = io;
 		this.room = roomName;
 		this.p1 = player1;
+		this.p1.score = 0;
 		this.p2 = player2;
+		this.p2.score = 0;
 		// pass new players to handlers
 		this.onUpdate(this.p1);
 		this.onUpdate(this.p2);
@@ -25,9 +27,9 @@ class GameManager {
 		};
 		
 		// size constants
-		var playerRad = 4;
-		var gemRad = 15;
-		var goalWidth = 100;
+		this.playerRad = 4;
+		this.gemRad = 15;
+		this.goalWidth = 100;
 		
 		// set players to default starting locations
 		this.p1.pos = {
@@ -43,9 +45,9 @@ class GameManager {
 		this.gems = [];
 		for (var i = 0; i < 20; i++) {
 			var newGem = {};
-			newGem.pos = {
-				x: (Math.random() * (this.screen.x - (2 * goalWidth) - (2 * gemRad)) + goalWidth + gemRad),
-				y: (Math.random() * (this.screen.y - (2 * gemRad)) + gemRad)
+			newGem = {
+				x: (Math.random() * (this.screen.x - (2 * this.goalWidth) - (2 * this.gemRad)) + this.goalWidth + this.gemRad),
+				y: (Math.random() * (this.screen.y - (2 * this.gemRad)) + this.gemRad)
 			};
 			this.gems.push(newGem);
 		}
@@ -127,9 +129,9 @@ class GameManager {
 		socket.on("click", function(data) {
 			// check click against all gems, starting from the closest to the camera
 			for (var i = this.gems.length - 1; i >= 0; i--) {
-				if(this.distance(data.pos, this.gems[i].pos) < (this.gemRad + this.playerRad)) {
+				if(this.distance(data.pos, this.gems[i]) < (this.gemRad + this.playerRad)) {					
 					// remove clicked gem from world array
-					delete this.gems[i];
+					this.gems.splice(i, 1);
 					
 					// update players of interaction
 					this.io.sockets.in(this.room).emit(
@@ -159,20 +161,35 @@ class GameManager {
 					return;
 				}
 			}
-		});
+		}.bind(this));
 	}
 	
 	// Callback for user click release
 	onRelease(socket) {
-		socket.on("release", function(data) {
+		socket.on("release", function(data) {		
+			// force grabbed to 0
+			socket.emit(
+				"update",
+				{
+					object: "player",
+					grabbed: 0
+				}
+			);
+						
+			socket.broadcast.to(socket.room).emit(
+				"update",
+				{
+					object: "opponent",
+					grabbed: 0
+				}
+			);
+			
 			// make sure player has a gem grabbed
-			if(socket.grabbed) {
+			if(data.grabbed == 1) {
 				// add new gem to world where player dropped it
 				var newGem = {
-					pos: {
-						x: socket.pos.x,
-						y: socket.pos.y
-					}
+					x: data.pos.x,
+					y: data.pos.y
 				};
 				
 				this.gems.push(newGem);
@@ -186,40 +203,24 @@ class GameManager {
 					}
 				);
 				
-				socket.emit(
-					"update",
-					{
-						object: "player",
-						grabbed: 0
-					}
-				);
-				
-				socket.broadcast.to(socket.room).emit(
-					"update",
-					{
-						object: "opponent",
-						grabbed: 0
-					}
-				);
-				
 				// check for scored point
 				this.checkScore();
 			}
-		});
+		}.bind(this));
 	}
 	
 	// FUNCTION: distance formula
 	distance(a, b) {
-		return Math.sqrt(Math.pow(b.pos.x - a.pos.x, 2) + Math.pow(b.pos.y - a.pos.y, 2));
+		return Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
 	}
 	
 	// FUNCTION: check gems to see if a point has been scored
 	checkScore() {
 		for (var i = 0; i < this.gems.length; i++) {
 			// player 1 scores
-			if(this.gems[i].pos.x < (this.goalWidth - this.gemRad)) {
+			if(this.gems[i].x < (this.goalWidth - this.gemRad)) {
 				// remove scored gem
-				delete this.gems[i];
+				this.gems.splice(i, 1);
 				i--;
 				
 				// notify of score
@@ -232,12 +233,13 @@ class GameManager {
 				);
 				
 				this.io.sockets.in(this.room).emit("score", {side: 0});
+				this.p1.score++;
 			}
 			
 			// player 2 scores
-			else if(this.gems[i].pos.x > (this.screen.x - this.goalWidth + this.gemRad)) {
+			else if(this.gems[i].x > (this.screen.x - this.goalWidth + this.gemRad)) {
 				// remove scored gem
-				delete this.gems[i];
+				this.gems.splice(i, 1);
 				i--;
 				
 				// notify of score
@@ -250,11 +252,12 @@ class GameManager {
 				);
 				
 				this.io.sockets.in(this.room).emit("score", {side: 1});
+				this.p2.score++;
 			}
 		}
 		
 		// check for win
-		if(this.gems.length === 0) {
+		if(this.gems.length == 0) {
 			// player 1 wins
 			if(this.p1.score > this.p2.score) {
 				this.io.sockets.in(this.room).emit("end", {side: 0});

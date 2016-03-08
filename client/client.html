@@ -134,6 +134,7 @@
 							player.side = data.side;
 						}
 						if(data.grabbed) {
+							console.log ("Received my grab: " + data.grabbed);
 							player.grabbed = data.grabbed;
 						}
 						break;
@@ -148,6 +149,7 @@
 							opponent.side = data.side;
 						}
 						if(data.grabbed) {
+							console.log ("Received opponent grab: " + data.grabbed);
 							opponent.grabbed = data.grabbed;
 						}
 						break;
@@ -167,18 +169,19 @@
 				// opponent point
 				else {
 					msgBox.innerHTML = opponent.name + " scores a point!";
-					opponent.points++;
+					opponent.score++;
 				}
 			});
 			
 			// Callback for game end
 			socket.on("end", function(data) {
+				console.log(data.side);
 				// player win
-				if (data.side === player.side) {
+				if (data.side == player.side) {
 					msgBox.innerHTML = player.name + " wins!";
 				}
 				// opponent win
-				else if (data.side === opponent.side){
+				else if (data.side == opponent.side){
 					msgBox.innerHTML = opponent.name + " wins!";
 				}
 				// tie
@@ -196,11 +199,11 @@
 			});
 			
 			// setup canvas mouse up behavior
-			canvas.addEventListener('mouseup', function(e) {
+			document.addEventListener('mouseup', function(e) {
 				player.pos.x = clamp(e.x - canvasPos.left, 0, canvas.width);
 				player.pos.y = clamp(e.y - canvasPos.top, 0, canvas.height);
-				
-				socket.emit('release', {pos: player.pos});
+								
+				socket.emit('release', {pos: player.pos, grabbed: player.grabbed});
 			});
 		}
 		
@@ -224,27 +227,27 @@
 			ctx.fillStyle = "#00d";
 			for (var i = 0; i < gems.length; i++) {
 				ctx.beginPath();
-				ctx.arc(gems[i].pos.x, gems[i].pos.y, gemRad, 0, Math.PI*2);
+				ctx.arc(gems[i].x, gems[i].y, gemRad, 0, Math.PI*2);
 				ctx.fill();
 			}
 			
 			// draw grabbed gems
-			if (player.grabbed) {
+			if (player.grabbed == 1) {
 				ctx.fillStyle = "#00e";
 				ctx.beginPath();
 				ctx.arc(player.pos.x, player.pos.y, gemRad, 0, Math.PI*2);
-				ctx.fill;
+				ctx.fill();
 			}
 			
-			if (opponent.grabbed) {
+			if (opponent.grabbed == 1) {
 				ctx.fillStyle = "#00e";
 				ctx.beginPath();
 				ctx.arc(opponent.pos.x, opponent.pos.y, gemRad, 0, Math.PI*2);
-				ctx.fill;
+				ctx.fill();
 			}
 			
 			// draw player cursors and scores
-			if (player.side === 0) {
+			if (player.side == 0) {
 				ctx.fillStyle = "#0e0"
 				ctx.beginPath();
 				ctx.arc(player.pos.x, player.pos.y, playerRad, 0, Math.PI*2);
