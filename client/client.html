@@ -8,8 +8,6 @@
 		* { 
 			font-family: helvetica, sans-serif; 
 			text-align: center;
-			color: #dde;
-			background-color: #222;
 		}
 	
 		div {
@@ -46,8 +44,8 @@
 		
 		//{ GAME VARS
 		// size constants
-		var playerRad = 3;
-		var gemRad = 10;
+		var playerRad = 4;
+		var gemRad = 15;
 		var goalWidth = 100;
 		
 		// info about this player
@@ -188,6 +186,22 @@
 					msgBox.innerHTML = "Tie game!";
 				}
 			});
+			
+			// setup canvas mouse down behavior
+			canvas.addEventListener('mousedown', function(e) {
+				player.pos.x = clamp(e.x - canvasPos.left, 0, canvas.width);
+				player.pos.y = clamp(e.y - canvasPos.top, 0, canvas.height);
+				
+				socket.emit('click', {pos: player.pos});
+			});
+			
+			// setup canvas mouse up behavior
+			canvas.addEventListener('mouseup', function(e) {
+				player.pos.x = clamp(e.x - canvasPos.left, 0, canvas.width);
+				player.pos.y = clamp(e.y - canvasPos.top, 0, canvas.height);
+				
+				socket.emit('release', {pos: player.pos});
+			});
 		}
 		
 		// FUNCTION: update local game instance
@@ -196,7 +210,7 @@
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			
 			// fill background
-			ctx.fillStyle = "#111";
+			ctx.fillStyle = "#eee";
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			
 			// draw goals
@@ -204,14 +218,14 @@
 			ctx.fillRect(0, 0, goalWidth, canvas.height);
 			
 			ctx.fillStyle = "#b00";
-			ctx.fillRect(canvas.width * 5/6, 0, goalWidth, canvas.height);
+			ctx.fillRect(canvas.width - goalWidth, 0, goalWidth, canvas.height);
 			
 			// draw all gems
 			ctx.fillStyle = "#00d";
 			for (var i = 0; i < gems.length; i++) {
 				ctx.beginPath();
-				ctx.arc(gems[i].x, gems[i].y, gemRad, 0, Math.PI*2);
-				ctx.fill;
+				ctx.arc(gems[i].pos.x, gems[i].pos.y, gemRad, 0, Math.PI*2);
+				ctx.fill();
 			}
 			
 			// draw grabbed gems
@@ -234,30 +248,34 @@
 				ctx.fillStyle = "#0e0"
 				ctx.beginPath();
 				ctx.arc(player.pos.x, player.pos.y, playerRad, 0, Math.PI*2);
-				ctx.fill;
+				ctx.fill();
 				
 				ctx.fillStyle = "#e00"
 				ctx.beginPath();
 				ctx.arc(opponent.pos.x, opponent.pos.y, playerRad, 0, Math.PI*2);
-				ctx.fill;
+				ctx.fill();
 			
+				ctx.fillStyle = "#000"
+				ctx.textAlign = "left";
 				ctx.fillText(player.name + ": " + player.score, 5, 25);
-				ctx.textAlign = "end";
+				ctx.textAlign = "right";
 				ctx.fillText(opponent.score + " :" + opponent.name, canvas.width - 5, 25);
 			}
 			else {
 				ctx.fillStyle = "#0e0"
 				ctx.beginPath();
 				ctx.arc(opponent.pos.x, opponent.pos.y, playerRad, 0, Math.PI*2);
-				ctx.fill;
+				ctx.fill();
 				
 				ctx.fillStyle = "#e00"
 				ctx.beginPath();
 				ctx.arc(player.pos.x, player.pos.y, playerRad, 0, Math.PI*2);
-				ctx.fill;
+				ctx.fill();
 			
+				ctx.fillStyle = "#000"
+				ctx.textAlign = "left";
 				ctx.fillText(opponent.name + ": " + opponent.score, 5, 25);
-				ctx.textAlign = "end";
+				ctx.textAlign = "right";
 				ctx.fillText(player.score + " :" + player.name, canvas.width - 5, 25);
 			}
 			
@@ -272,7 +290,7 @@
 		function init() {
 			// get reference to game canvas and context
 			canvas = document.querySelector("#gameCanvas");
-			var canvasPos = canvas.getBoundingClientRect();
+			canvasPos = canvas.getBoundingClientRect();
 			ctx = canvas.getContext("2d");
 			
 			// grab feedback box
@@ -285,22 +303,6 @@
 			document.addEventListener('mousemove', function(e) {
 				player.pos.x = clamp(e.x - canvasPos.left, 0, canvas.width);
 				player.pos.y = clamp(e.y - canvasPos.top, 0, canvas.height);
-			});
-			
-			// setup canvas mouse down behavior
-			document.addEventListener('mousedown', function(e) {
-				player.pos.x = clamp(e.x - canvasPos.left, 0, canvas.width);
-				player.pos.y = clamp(e.y - canvasPos.top, 0, canvas.height);
-				
-				socket.emit('click', {pos: player.pos};
-			});
-			
-			// setup canvas mouse up behavior
-			document.addEventListener('mouseup', function(e) {
-				player.pos.x = clamp(e.x - canvasPos.left, 0, canvas.width);
-				player.pos.y = clamp(e.y - canvasPos.top, 0, canvas.height);
-				
-				socket.emit('release', {pos: player.pos};
 			});
 			
 			// setup canvas text

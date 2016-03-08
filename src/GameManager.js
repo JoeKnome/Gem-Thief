@@ -19,12 +19,14 @@ class GameManager {
 		this.onRelease(this.p2);
 		
 		// set screen size
-		this.screen.x = 640;
-		this.screen.y = 480;
+		this.screen = {
+			x: 640,
+			y: 480
+		};
 		
 		// size constants
-		var playerRad = 3;
-		var gemRad = 10;
+		var playerRad = 4;
+		var gemRad = 15;
 		var goalWidth = 100;
 		
 		// set players to default starting locations
@@ -41,8 +43,10 @@ class GameManager {
 		this.gems = [];
 		for (var i = 0; i < 20; i++) {
 			var newGem = {};
-			newGem.pos.x = (Math.random() * (this.screen.x - (2 * goalWidth) - (2 * gemRad)) + goalWidth + gemRad);
-			newGem.pos.y = (Math.random() * (this.screen.y - (2 * gemRad)) + gemRad);
+			newGem.pos = {
+				x: (Math.random() * (this.screen.x - (2 * goalWidth) - (2 * gemRad)) + goalWidth + gemRad),
+				y: (Math.random() * (this.screen.y - (2 * gemRad)) + gemRad)
+			};
 			this.gems.push(newGem);
 		}
 		
@@ -101,7 +105,7 @@ class GameManager {
 		);
 		
 		// start player update loops
-		this.io.sockets.in(this.room).emit("beginPlay");
+		this.io.sockets.in(this.room).emit("play");
 	}
 	
 	// Callback for user update
