@@ -124,6 +124,8 @@
 				// which object is being updated
 				switch (data.object) {
 					case "player":
+						console.log("Received player update");
+						console.dir(data);
 						if (data.pos) {
 							player.pos = data.pos;
 						}
@@ -133,12 +135,14 @@
 						if (data.side) {
 							player.side = data.side;
 						}
-						if(data.grabbed) {
+						if(data.grabbed != null) {
 							console.log ("Received my grab: " + data.grabbed);
 							player.grabbed = data.grabbed;
 						}
 						break;
 					case "opponent":
+						console.log("Received opponent update");
+						console.dir(data);
 						if (data.pos) {
 							opponent.pos = data.pos;
 						}
@@ -148,7 +152,7 @@
 						if (data.side) {
 							opponent.side = data.side;
 						}
-						if(data.grabbed) {
+						if(data.grabbed != null) {
 							console.log ("Received opponent grab: " + data.grabbed);
 							opponent.grabbed = data.grabbed;
 						}
