@@ -1,3 +1,6 @@
+/*jshint esversion: 6 */
+/*jshint node: true */
+
 "use strict";
 
 // CLASS: handles an instance of Gem Thief
@@ -8,12 +11,12 @@ class GameManager {
 		this.p1 = player1;
 		this.p2 = player2;
 		// pass new players to handlers
-		this.onUpdate(p1);
-		this.onUpdate(p2);
-		this.onClick(p1);
-		this.onClick(p2);
-		this.onRelease(p1);
-		this.onRelease(p2);
+		this.onUpdate(this.p1);
+		this.onUpdate(this.p2);
+		this.onClick(this.p1);
+		this.onClick(this.p2);
+		this.onRelease(this.p1);
+		this.onRelease(this.p2);
 		
 		// set screen size
 		this.screen.x = 640;
@@ -119,10 +122,10 @@ class GameManager {
 	onClick(socket) {
 		socket.on("click", function(data) {
 			// check click against all gems, starting from the closest to the camera
-			for (var i = gems.length - 1; i >= 0; i--) {
-				if(distance(data.pos, gems[i].pos) < (gemRad + playerRad)) {
+			for (var i = this.gems.length - 1; i >= 0; i--) {
+				if(this.distance(data.pos, this.gems[i].pos) < (this.gemRad + this.playerRad)) {
 					// remove clicked gem from world array
-					delete gems[i];
+					delete this.gems[i];
 					
 					// update players of interaction
 					this.io.sockets.in(this.room).emit(
@@ -166,7 +169,7 @@ class GameManager {
 						x: socket.pos.x,
 						y: socket.pos.y
 					}
-				}
+				};
 				
 				this.gems.push(newGem);
 				
@@ -196,7 +199,7 @@ class GameManager {
 				);
 				
 				// check for scored point
-				checkScore();
+				this.checkScore();
 			}
 		});
 	}
@@ -230,7 +233,7 @@ class GameManager {
 			// player 2 scores
 			else if(this.gems[i].pos.x > (this.screen.x - this.goalWidth + this.gemRad)) {
 				// remove scored gem
-				delete gems[i];
+				delete this.gems[i];
 				i--;
 				
 				// notify of score
